@@ -5,14 +5,12 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "pegleg"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{PeopleSoft General Ledger Journal Format Library}
+    gem.description = %Q{Read/Write Journal Files in a format palatable to PeopleSoft General Ledger.}
     gem.email = "paul.t.hinze@gmail.com"
     gem.homepage = "http://github.com/phinze/pegleg"
-    gem.authors = ["phinze"]
+    gem.authors = ["Paul Hinze"]
     gem.add_development_dependency "rspec", ">= 1.2.9"
-    gem.add_development_dependency "cucumber", ">= 0"
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError

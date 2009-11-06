@@ -1,0 +1,8 @@
+= pegleg - Peoplesoft General Ledger Journal Format Library
+
+Read/Write Journal Files in a format palatable to PeopleSoft General Ledger.
+
+Documentation on the format to be included in this project, but for now check
+this link:
+
+http://www.docstoc.com/docs/document-preview.aspx?doc_id=2434592

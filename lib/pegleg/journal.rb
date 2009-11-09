@@ -1,0 +1,3 @@
+class Pegleg::Journal
+  
+end

@@ -1,0 +1,414 @@
+=================================================================
+Understanding File Format in the Flat File Journal Import Process
+=================================================================
+
+
+The file format is determined by the File Layout Object (GL_JRNL_IMPORT).
+The following is the file format for the Flat File Journal Import process.
+PeopleSoft delivered a sample flat file named journal.dat under the “data”
+folder. The layout varies depending on the first column with the following
+meaning:
+
+H = Journal header.
+L = Journal line.
+
+
+File Format for Journal Header
+==============================
+
+This information describes the flat file's journal header format.
+
++---------------------------------------------------------------------+
+|Column       |Length       |Description        |Req'd? |Value        |
++---------------------------------------------------------------------+
+|1            |1            |                   |Y      |H            |
++---------------------------------------------------------------------+
+|2            |5            |Business Unit      |Y      |_____        |
++---------------------------------------------------------------------+
+|7            |10           |Journal ID         |Y      |Use same     |
+|             |             |A value of 'NEXT'  |       |journal id   |
+|             |             |will create auto   |       |used         |
+|             |             |numbered journal   |       |historically.|
+|             |             |IDs.               |       |             |
++---------------------------------------------------------------------+
+|17           |8            |Journal Date       |Y      |Should       |
+|             |             |(MMDDYYYY)         |       |correspond to|
+|             |             |                   |       |Accounting   |
+|             |             |                   |       |date – it    |
+|             |             |                   |       |will be      |
+|             |             |                   |       |translated to|
+|             |             |                   |       |Accounting   |
+|             |             |                   |       |Period based |
+|             |             |                   |       |on Acctg     |
+|             |             |                   |       |Calendar     |
++---------------------------------------------------------------------+
+|25           |1            |Adjusting Entry    |N      |(blank)      |
+|             |             |Y = Adjusting      |       |             |
+|             |             |Journal            |       |             |
+|             |             |N = Regular Journal|       |             |
+|             |             |(default)          |       |             |
++---------------------------------------------------------------------+
+|26           |3            |Adjusting Period   |N      |(blank)      |
+|             |             |Will default to 998|       |             |
+|             |             |for adjusting      |       |             |
+|             |             |journal            |       |             |
++---------------------------------------------------------------------+
+|29           |8            |ADB Average Daily  |N      |(blank)      |
+|             |             |Balance Date       |       |             |
+|             |             |(MMDDYYYY)         |       |             |
+|             |             |Default to Journal |       |             |
+|             |             |Date if this is    |       |             |
+|             |             |blank              |       |             |
++---------------------------------------------------------------------+
+|37           |10           |Ledger Group       |Y      |ACTUALS      |
++---------------------------------------------------------------------+
+|47           |1            |Reversal Code      |N      |(blank)      |
+|             |             |B = Begin next     |       |             |
+|             |             |period             |       |             |
+|             |             |E = End next period|       |             |
+|             |             |X = Next day       |       |             |
+|             |             |D = User defined   |       |             |
+|             |             |date               |       |             |
+|             |             |N = No reversal    |       |             |
+|             |             |(default)          |       |             |
++---------------------------------------------------------------------+
+|48           |8            |Reversal Date      |N      |(blank)      |
+|             |             |(MMDDYYYY)         |       |             |
+|             |             |Populated by       |       |             |
+|             |             |journal edit       |       |             |
+|             |             |program if B or E. |       |             |
+|             |             |Must have a valid  |       |             |
+|             |             |date if D.         |       |             |
++---------------------------------------------------------------------+
+|56           |3            |Reversal Adjustment|N      |(blank)      |
+|             |             |Period             |       |             |
++---------------------------------------------------------------------+
+|59           |1            |ADB Reversal Code  |N      |(blank)      |
+|             |             |D = User defined   |       |             |
+|             |             |date               |       |             |
+|             |             |S = Same as journal|       |             |
+|             |             |reversal (default) |       |             |
++---------------------------------------------------------------------+
+|60           |8            |ADB Reversal Date  |N      |(blank)      |
+|             |             |(MMDDYYYY) Must    |       |             |
+|             |             |have a valid date  |       |             |
+|             |             |if D.              |       |             |
++---------------------------------------------------------------------+
+|68           |3            |Journal Source     |Y      |             |
+|             |             |                   |       |             |
+|             |             |                   |       |             |
+|             |             |                   |       |             |
++---------------------------------------------------------------------+
+|71           |8            |Transaction        |N      |Populate as  |
+|             |             |Reference Number   |       |needed       |
++---------------------------------------------------------------------+
+|79           |30           |Description        |Y      |Required     |
++---------------------------------------------------------------------+
+|109          |3            |Default Currency   |N      |(blank)      |
+|             |             |Code               |       |             |
+|             |             |Will default to    |       |             |
+|             |             |base currency of   |       |             |
+|             |             |Business Unit.     |       |             |
++---------------------------------------------------------------------+
+|112          |5            |Default Currency   |N      |(blank)      |
+|             |             |Rate Type          |       |             |
++---------------------------------------------------------------------+
+|117          |8            |Default Currency   |N      |(blank)      |
+|             |             |Effective Date     |       |             |
+|             |             |(MMDDYYYY)         |       |             |
+|             |             |Will default to    |       |             |
+|             |             |Journal Date       |       |             |
++---------------------------------------------------------------------+
+|125          |17           |Default Currency   |N      |(blank)      |
+|             |             |Exchange Rate      |       |             |
+|             |             |Will default to 1  |       |             |
+|             |             |if Default Currency|       |             |
+|             |             |= Base Currency.   |       |             |
+|             |             |Will use table     |       |             |
+|             |             |lookup in journal  |       |             |
+|             |             |edit program if    |       |             |
+|             |             |currency rate type |       |             |
+|             |             |is entered and     |       |             |
+|             |             |"recalc exchange   |       |             |
+|             |             |rate" is selected  |       |             |
+|             |             |for journal edit   |       |             |
+|             |             |request.           |       |             |
++---------------------------------------------------------------------+
+|142          |3            |System Source      |N      |(blank)      |
+|             |             |EXT = Journal Edit |       |             |
+|             |             |will create VAT    |       |             |
+|             |             |lines and calculate|       |             |
+|             |             |it if VAT lines are|       |             |
+|             |             |not imported       |       |             |
+|             |             |(default).         |       |             |
+|             |             |EXV = Journal Edit |       |             |
+|             |             |will not create or |       |             |
+|             |             |calculate VAT      |       |             |
+|             |             |lines.             |       |             |
++---------------------------------------------------------------------+
+|145          |8            |Document Type for  |N      |(blank)      |
+|             |             |Document Sequencing|       |             |
+|             |             |If blank, will get |       |             |
+|             |             |value from default |       |             |
+|             |             |on run request     |       |             |
+|             |             |panel, journal     |       |             |
+|             |             |source and ledger  |       |             |
+|             |             |group.             |       |             |
++---------------------------------------------------------------------+
+|153          |12           |Document Sequence  |N      |(blank)      |
+|             |             |number             |       |             |
+|             |             |Filled by doc seq  |       |             |
+|             |             |routine if Doc     |       |             |
+|             |             |Sequencing is      |       |             |
+|             |             |enabled, else      |       |             |
+|             |             |blank. Entered     |       |             |
+|             |             |number will be     |       |             |
+|             |             |checked by Doc     |       |             |
+|             |             |Sequencing         |       |             |
++---------------------------------------------------------------------+
+|165          |1            |Budget Header      |N      |(blank)      |
+|             |             |Status             |       |             |
+|             |             |V = Budget         |       |             |
+|             |             |validated          |       |             |
+|             |             |N = Not validated  |       |             |
+|             |             |(default)          |       |             |
++---------------------------------------------------------------------+
+|166          |1            |Commitment Control |N      |(blank)      |
+|             |             |Amount Type        |       |             |
+|             |             |1 = Actuals        |       |             |
+|             |             |(default)          |       |             |
+|             |             |2 = Encumbrance    |       |             |
+|             |             |3 = Pre-encumbrance|       |             |
++---------------------------------------------------------------------+
+|167          |4            |GL Adjustment Type |N      |(blank)      |
++---------------------------------------------------------------------+
+|171          |10           |Journal Class      |N      |(blank)      |
++---------------------------------------------------------------------+
+
+File Format for Journal Line
+============================
+
+Journal Line data follows its corresponding journal header in the flat
+file.
+
++----------------------------------------------------------------------+
+|Column       |Length       |Description       |Required|Value         |
++----------------------------------------------------------------------+
+|1            |1            |                  |Y       |L             |
++----------------------------------------------------------------------+
+|2            |5            |Business Unit     |Y       |_____         |
+|             |             |Will default to   |        |              |
+|             |             |Business Unit from|        |              |
+|             |             |header. If a      |        |              |
+|             |             |different BU is   |        |              |
+|             |             |entered, this will|        |              |
+|             |             |be an InterUnit   |        |              |
+|             |             |line.             |        |              |
++----------------------------------------------------------------------+
+|7            |9            |Journal Line      |N       |(blank)       |
+|             |             |Number            |        |              |
+|             |             |Will default to   |        |              |
+|             |             |one more than the |        |              |
+|             |             |previous line     |        |              |
+|             |             |number. First line|        |              |
+|             |             |will default to 1 |        |              |
++----------------------------------------------------------------------+
+|16           |10           |Ledger            |Y       |ACTUALS       |
+|             |             |If Ledger Group is|        |              |
+|             |             |a Commitment      |        |              |
+|             |             |Control Ledger    |        |              |
+|             |             |Group, this will  |        |              |
+|             |             |be ignored from   |        |              |
+|             |             |the flat file and |        |              |
+|             |             |assigned according|        |              |
+|             |             |to commitment     |        |              |
+|             |             |control amount    |        |              |
+|             |             |type.             |        |              |
++----------------------------------------------------------------------+
+|26           |10           |IACCT             |Y       |Valid PS      |
+|             |             |                  |        |InstAccount   |
+|             |             |                  |        |Number        |
+|             |             |                  |        |              |
++----------------------------------------------------------------------+
+|36           |10           |Alternate Account |N       |(blank)       |
++----------------------------------------------------------------------+
+|46           |10           |Department        |Y       |Valid PS      |
+|             |             |                  |        |Department    |
+|             |             |                  |        |              |
++----------------------------------------------------------------------+
+|56           |8            |Grant/Program     |Y       |Valid PS      |
+|             |             |                  |        |Grant/ Program|
++----------------------------------------------------------------------+
+|64           |6            |Org Unit          |Y       |Valid PS Org  |
+|             |             |                  |        |Unit          |
+|             |             |                  |        |              |
++----------------------------------------------------------------------+
+|70           |5            |Fund Code         |Y       |Valid PS Fund |
+|             |             |                  |        |Unit          |
++----------------------------------------------------------------------+
+|75           |5            |Function          |Y       |Valid PS      |
+|             |             |                  |        |Function Unit |
++----------------------------------------------------------------------+
+|80           |5            |Cost Center       |Y       |Valid PS CC   |
+|             |             |                  |        |Unit          |
++----------------------------------------------------------------------+
+|85           |8            |Budget Reference  |N       |(blank)       |
++----------------------------------------------------------------------+
+|93           |5            |Affiliate         |N       |(blank)       |
++----------------------------------------------------------------------+
+|98           |10           |Fund Affiliate    |N       |(blank)       |
++----------------------------------------------------------------------+
+|108          |10           |Operating Unit    |N       |(blank)       |
+|             |             |Affiliate         |        |              |
++----------------------------------------------------------------------+
+|118          |10           |OACCT             |Y       |Valid PS Org  |
+|             |             |                  |        |acct Unit     |
++----------------------------------------------------------------------+
+|128          |10           |DACCT             |Y       |Valid PS      |
+|             |             |                  |        |Dept’l acct   |
+|             |             |                  |        |Unit          |
++----------------------------------------------------------------------+
+|138          |17           |SLID/SLAC         |N       |(blank)       |
++----------------------------------------------------------------------+
+|155          |15           |Project           |N       |(blank)       |
++----------------------------------------------------------------------+
+|170          |4            |Book Code         |N       |(blank)       |
++----------------------------------------------------------------------+
+|174          |8            |Budget Period     |N       |(blank)       |
++----------------------------------------------------------------------+
+|182          |10           |Scenario          |N       |(blank)       |
++----------------------------------------------------------------------+
+|192          |3            |Statistics Code   |N       |(blank)       |
++----------------------------------------------------------------------+
+|195          |28           |Base Currency     |Y       |Left Justified|
+|             |             |Amount            |        |              |
+|             |             |Will be calculated|        |Credit amounts|
+|             |             |from Transaction  |        |must be       |
+|             |             |Amount and        |        |preceded by - |
+|             |             |exchange rate. If |        |Include       |
+|             |             |entered and       |        |decimal point |
+|             |             |exchange rate = 0,|        |              |
+|             |             |and "recalc       |        |              |
+|             |             |exchange rate" is |        |              |
+|             |             |selected for the  |        |              |
+|             |             |journal edit      |        |              |
+|             |             |request, the      |        |              |
+|             |             |exchange rate will|        |              |
+|             |             |be calculated.    |        |              |
++----------------------------------------------------------------------+
+|223          |1            |Movement Flag     |N       |(blank)       |
+|             |             |N = Natural       |        |              |
+|             |             |(default)         |        |              |
+|             |             |R = Reverse       |        |              |
++----------------------------------------------------------------------+
+|223          |17           |Statistics Amount |N       |(blank)       |
+|             |             |Only valid for    |        |              |
+|             |             |statistical       |        |              |
+|             |             |accounts or for   |        |              |
+|             |             |lines with        |        |              |
+|             |             |statistic codes   |        |              |
++----------------------------------------------------------------------+
+|241          |10           |Journal Line      |N       |Populate as   |
+|             |             |Reference         |        |needed        |
++----------------------------------------------------------------------+
+|251          |30           |Journal Line      |Y       |              |
+|             |             |Description       |        |              |
++----------------------------------------------------------------------+
+|281          |3            |Currency Code     |N       |(blank)       |
+|             |             |Will default to   |        |              |
+|             |             |default currency  |        |              |
+|             |             |on header. Must be|        |              |
+|             |             |the same as the   |        |              |
+|             |             |base currency for |        |              |
+|             |             |the header BU if  |        |              |
+|             |             |the line BU is    |        |              |
+|             |             |different. The    |        |              |
+|             |             |journal edit      |        |              |
+|             |             |program will blank|        |              |
+|             |             |this out for a    |        |              |
+|             |             |statistical       |        |              |
+|             |             |account           |        |              |
++----------------------------------------------------------------------+
+|284          |5            |Currency Rate Type|N       |(blank)       |
++----------------------------------------------------------------------+
+|289          |28           |Amount            |N       |(blank)       |
+|             |             |Transaction       |        |              |
+|             |             |Currency Amount   |        |              |
++----------------------------------------------------------------------+
+|317          |17           |Currency Exchange |N       |(blank)       |
+|             |             |Rate              |        |              |
+|             |             |Will default to 1 |        |              |
+|             |             |if Currency Code =|        |              |
+|             |             |Base Currency.    |        |              |
+|             |             |Will use table    |        |              |
+|             |             |lookup in journal |        |              |
+|             |             |edit program if   |        |              |
+|             |             |currency rate type|        |              |
+|             |             |is entered and    |        |              |
+|             |             |"recalc exchange  |        |              |
+|             |             |rate" is selected |        |              |
+|             |             |for journal edit  |        |              |
+|             |             |request.          |        |              |
++----------------------------------------------------------------------+
+|334          |5            |Projects Business |N       |(blank)       |
+|             |             |Unit              |        |              |
++----------------------------------------------------------------------+
+|339          |15           |Projects Activity |N       |(blank)       |
+|             |             |ID                |        |              |
++----------------------------------------------------------------------+
+|354          |3            |Projects Analysis |N       |(blank)       |
+|             |             |Type              |        |              |
++----------------------------------------------------------------------+
+|357          |5            |Projects Resource |N       |(blank)       |
+|             |             |Type              |        |              |
++----------------------------------------------------------------------+
+|362          |5            |Projects Resource |N       |(blank)       |
+|             |             |Category          |        |              |
++----------------------------------------------------------------------+
+|367          |5            |Projects Resource |N       |(blank)       |
+|             |             |Sub-category      |        |              |
++----------------------------------------------------------------------+
+|372          |8            |Budget Date       |N       |(blank)       |
+|             |             |(MMDDYYYY)        |        |              |
+|             |             |Will default to   |        |              |
+|             |             |Journal Date if   |        |              |
+|             |             |blank             |        |              |
++----------------------------------------------------------------------+
+|380          |1            |Budget Line Status|N       |(blank)       |
+|             |             |Will default to N |        |              |
+|             |             |if blank or Budget|        |              |
+|             |             |Header Status = N |        |              |
++----------------------------------------------------------------------+
+|381          |10           |Entry Event       |N       |(blank)       |
++----------------------------------------------------------------------+
+|391          |4            |Inter/IntraUnit   |N       |(blank)       |
+|             |             |transaction group |        |              |
+|             |             |number            |        |              |
++----------------------------------------------------------------------+
+|395          |1            |Inter/IntraUnit   |N       |(blank)       |
+|             |             |anchor flag       |        |              |
++----------------------------------------------------------------------+
+|396          |30           |Open Item Key     |N       |Populate as   |
+|             |             |                  |        |needed        |
++----------------------------------------------------------------------+
+|426          |10           |PO Number         |N       |Populate as   |
+|             |             |                  |        |needed        |
++----------------------------------------------------------------------+
+|436          |8            |Voucher ID        |N       |Populate as   |
+|             |             |                  |        |needed        |
++----------------------------------------------------------------------+
+|444          |20           |Check Number      |N       |Populate as   |
+|             |             |                  |        |needed        |
++----------------------------------------------------------------------+
+|464          |40           |Vendor Name       |N       |Populate as   |
+|             |             |                  |        |needed        |
++----------------------------------------------------------------------+
+|504          |9            |Not applicable    |N       |Do not        |
+|             |             |                  |        |populate      |
++----------------------------------------------------------------------+
+|513          |30           |User ID           |N       |Populate if   |
+|             |             |                  |        |available.    |
++----------------------------------------------------------------------+
+|543          |8            |University ID     |N       |Populate as   |
+|             |             |                  |        |needed        |
++----------------------------------------------------------------------+
